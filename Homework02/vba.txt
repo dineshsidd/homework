@@ -10,6 +10,10 @@ Dim close_value As Double
 Dim greatest_increase As Double
 Dim greatest_decrease As Double
 Dim greatest_volume As Double
+Dim greatest_inc_ticker As String
+Dim greatest_dec_ticker As String
+Dim greatest_volume_ticker As String
+
 
 
 
@@ -26,6 +30,11 @@ ws.Cells(3, 16).Value = "Greatest % Decrease"
 ws.Cells(4, 16).Value = "Greatest Total Volume"
 ws.Cells(1, 17).Value = "Ticker"
 ws.Cells(1, 18).Value = "Value"
+
+greatest_inc_ticker = ""
+greatest_dec_ticker = ""
+greatest_volume_ticker = ""
+
 
 'Initialize the values before looping through each worksheet
 greatest_increase = 0
@@ -50,34 +59,53 @@ ws.Cells(result_row, 11).Value = ticker
 ws.Cells(result_row, 12).Value = volume
 ws.Cells(result_row, 13).Value = close_value - open_value
 If open_value <> 0 Then 'To avoid Divided by Zero Error
-ws.Cells(result_row, 14).Value = (close_value - open_value) * 100 / open_value
+ws.Cells(result_row, 14).Value = (close_value - open_value) / open_value
+ws.Cells(result_row, 14).NumberFormat = "0.00%"
 Else
 ws.Cells(result_row, 14).Value = 0
+ws.Cells(result_row, 14).NumberFormat = "0.00%"  'Format the Cell to show % sign next to the number
 End If
 
 If ws.Cells(result_row, 13).Value >= 0 Then
-ws.Cells(result_row, 13).Interior.ColorIndex = 4
+ws.Cells(result_row, 13).Interior.ColorIndex = 4  'Green when positive
 Else
-ws.Cells(result_row, 13).Interior.ColorIndex = 3
+ws.Cells(result_row, 13).Interior.ColorIndex = 3  'Red When negative
 End If
 
-If ws.Cells(result_row, 13).Value > greatest_increase Then
-greatest_increase = ws.Cells(result_row, 13).Value
-ElseIf ws.Cells(result_row, 13).Value < greatest_decrease Then
-greatest_decrease = ws.Cells(result_row, 13).Value
+If ws.Cells(result_row, 14).Value > greatest_increase Then   'if the current value is bigger than the previous , take current
+greatest_increase = ws.Cells(result_row, 14).Value
+greatest_inc_ticker = ws.Cells(result_row, 11).Value
+ElseIf ws.Cells(result_row, 14).Value < greatest_decrease Then
+greatest_decrease = ws.Cells(result_row, 14).Value
+greatest_dec_ticker = ws.Cells(result_row, 11).Value
 End If
 
+If greatest_volume < volume Then  'if the current value is bigger than the previous , take current
+greatest_volume = volume
+greatest_volume_ticker = ws.Cells(result_row, 11).Value
+End If
 
 
 'Reset the values
 open_value = ws.Cells(i, 3).Value
 result_row = result_row + 1
 ticker = ws.Cells(i, 1).Value
-volume = 0
+volume = ws.Cells(i, 7).Value
 End If
-
-
+ 
 Next i
+
+'Populate the Percentage & Volume values after iterating through all the rows of the current sheet
+
+ws.Cells(2, 18).Value = greatest_increase
+ws.Cells(2, 18).NumberFormat = "0.00%"
+ws.Cells(3, 18).Value = greatest_decrease
+ws.Cells(3, 18).NumberFormat = "0.00%"
+ws.Cells(4, 18).Value = greatest_volume
+ws.Cells(2, 17).Value = greatest_inc_ticker
+ws.Cells(3, 17).Value = greatest_dec_ticker
+ws.Cells(4, 17).Value = greatest_volume_ticker
+
 Next ws
 
 
@@ -94,5 +122,7 @@ ws.Range("i:s").Interior.ColorIndex = 0
 Next ws
 
 End Sub
+
+
 
 
